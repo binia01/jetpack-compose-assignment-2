@@ -12,17 +12,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.room.Room
+import com.example.todolistapp.data.local.AppDatabase
+import com.example.todolistapp.data.repository.ToDoRepository
+import com.example.todolistapp.network.RetrofitInstance
+import com.example.todolistapp.ui.navigation.AppNavigation
 import com.example.todolistapp.ui.theme.ToDoListAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "todo_db"
+        ).build()
+
+        val repository = ToDoRepository(RetrofitInstance.api, db.ToDoDao())
+
         setContent {
             ToDoListAppTheme {
-                Surface {
-
-                }
+                AppNavigation(repository)
             }
         }
     }
