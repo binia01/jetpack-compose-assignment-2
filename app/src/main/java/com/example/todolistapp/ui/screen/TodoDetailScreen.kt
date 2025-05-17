@@ -31,7 +31,9 @@ fun TodoDetailScreen(
         if (todo != null) {
             Column(modifier = Modifier.padding(padding).padding(16.dp)) {
                 Text(text = "ID: ${todo.id}", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(text = "Title: ${todo.title}", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Status: ${if (todo.isCompleted) "Completed" else "Pending"}",
                     style = MaterialTheme.typography.bodyLarge
