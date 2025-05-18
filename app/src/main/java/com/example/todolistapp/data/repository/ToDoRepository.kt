@@ -1,30 +1,41 @@
 package com.example.todolistapp.data.repository
 
 import com.example.todolistapp.data.local.ToDoDao
+import com.example.todolistapp.data.model.TodoEntity
 import com.example.todolistapp.data.model.TodoItem
 import com.example.todolistapp.data.model.toEntity
 import com.example.todolistapp.data.model.toTodoItem
 import com.example.todolistapp.data.remote.ToDoService
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
 
 class ToDoRepository(
     private val api: ToDoService,
     private val dao: ToDoDao
-){
-    suspend fun getTodos(): List<TodoItem> = withContext(Dispatchers.IO) {
-        try {
-            val remoteTodos = api.getTodos()
-            dao.insertTodos(remoteTodos.map { it.toEntity() })
-            remoteTodos
-        } catch (e: Exception) {
-            // Fallback to cached data if network fails
-            dao.getAllTodos().map { it.toTodoItem() }
+) {
+    fun getTodos(): Flow<List<TodoItem>> = dao.getAllTodos()
+        .map { list -> list.map { it.toTodoItem() } }
+        .onStart {
+            try {
+                val remoteTodos = api.getTodos()
+                dao.insertTodos(remoteTodos.map { it.toEntity() })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
+
+
+    fun getTodoById(id: Int): Flow<TodoItem?> {
+        return dao.getAllTodos()
+            .map { todos ->
+                todos.firstOrNull { it.id == id }?.toTodoItem()
+            }
     }
 
-    suspend fun getTodoById(id: Int): TodoItem? = withContext(Dispatchers.IO) {
-        dao.getAllTodos().firstOrNull { it.id == id }?.toTodoItem()
+    suspend fun updateTodo(todo: TodoEntity) {
+        withContext(Dispatchers.IO) {
+            dao.updateTodo(todo)
+        }
     }
 }

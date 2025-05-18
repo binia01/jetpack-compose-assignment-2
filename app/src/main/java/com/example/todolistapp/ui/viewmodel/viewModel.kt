@@ -2,10 +2,13 @@ package com.example.todolistapp.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todolistapp.data.model.TodoEntity
 import com.example.todolistapp.data.model.TodoItem
 import com.example.todolistapp.data.repository.ToDoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 sealed class TodoUiState {
@@ -26,16 +29,20 @@ class TodoListViewModel(
     }
 
     fun loadTodos() {
-        _uiState.value = TodoUiState.Loading
         viewModelScope.launch {
-            try {
-                val todos = repository.getTodos()
-                _uiState.value = TodoUiState.Success(todos)
-            } catch (e: Exception) {
-                _uiState.value = TodoUiState.Error("Failed to load todos")
-            }
+            repository.getTodos()
+                .onStart {
+                    _uiState.value = TodoUiState.Loading
+                }
+                .catch { e ->
+                    _uiState.value = TodoUiState.Error("Failed to load todos: ${e.message}")
+                }
+                .collect { todos ->
+                    _uiState.value = TodoUiState.Success(todos)
+                }
         }
     }
+
 
     fun getTodoById(id: Int): TodoItem? {
         val currentState = _uiState.value
@@ -43,4 +50,11 @@ class TodoListViewModel(
             currentState.todos.find { it.id == id }
         } else null
     }
+
+    fun toggleTodoCompletion(todo: TodoEntity) {
+        viewModelScope.launch {
+            repository.updateTodo(todo)
+        }
+    }
+
 }

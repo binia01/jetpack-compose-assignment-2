@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-05-17T19:19:41.594355300Z">
+        <DropdownSelection timestamp="2025-05-18T05:51:44.550472600Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=RFCR20MX38A" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\binia\.android\avd\Medium_Phone.avd" />
             </handle>
           </Target>
         </DropdownSelection>
